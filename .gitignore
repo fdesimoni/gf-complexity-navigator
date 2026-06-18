@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Data layers (generated from input/ — bronze/silver/gold parquet, samples, DQ log)
+data/
+
+# Generated demo artifacts (PNGs, CSVs in demos/)
+demos/**/*.png
+demos/**/*.csv
+
+# Excel files (optional: comment out to track demo Excel outputs)
+*.xlsx
