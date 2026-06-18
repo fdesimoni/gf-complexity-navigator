@@ -20,6 +20,9 @@ ENV/
 .env
 .env.local
 
+# Source data (GF exports — confidential)
+input/
+
 # Data layers (generated from input/ — bronze/silver/gold parquet, samples, DQ log)
 data/
 

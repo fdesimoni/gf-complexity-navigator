@@ -1,11 +1,9 @@
 """
 GF BFS - "Auswertung" charts, driven by each chart's spec.md
 ============================================================
-Re-creates, in the Helbling pitch style (chart + comment box), the analyses
-shown in demo_output/Auswertung.pdf - but on the GF sample files.
 
-SPEC-DRIVEN RENDERING (new):
-  Every chart now reads its own spec.md and asks the Helbling LLM router to turn
+SPEC-DRIVEN RENDERING 
+  Every chart reads its own spec.md and asks the Helbling LLM router to turn
   that prose specification into a small, *structured* render plan (chart kind,
   fields, sort order, year, encodings, labels). The plan is then executed
   deterministically in pandas/matplotlib.
@@ -16,8 +14,8 @@ SPEC-DRIVEN RENDERING (new):
   Excel files. If the router is unreachable, each chart falls back to a built-in
   default plan, so the pipeline stays runnable offline.
 
-Scope (mirrors the four chart-*/spec.md folders):
-  A) Sales x margin per product group          (chart-product_group_sales_margin)
+Scope:
+  A) Sales x margin per product group           (chart-product_group_sales_margin)
   B) Product growth (CAGR) x margin             (chart-product_cagr_margin)
   C) Customer ABC / Pareto                      (chart-customer_abc)
   D) Product split by buying group (Marimekko)  (chart-product_split_segment)
