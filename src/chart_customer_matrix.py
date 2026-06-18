@@ -378,8 +378,13 @@ def main():
     for quad, count in cm["quadrant"].value_counts().items():
         print(f"    - {quad}: {count}")
 
-    print("\nStep 3: Render chart...")
-    render_customer_matrix(cm)
+    print("\nStep 3: Render chart (Vega-Lite)...")
+    try:
+        from chart_customer_matrix_vl import render_customer_matrix_vl
+        render_customer_matrix_vl(cm)
+    except ImportError:
+        print("  [WARNING] chart_customer_matrix_vl not found; falling back to matplotlib")
+        render_customer_matrix(cm)
 
     print("\nStep 4: Export data...")
     export_data(cm)
