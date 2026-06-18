@@ -29,6 +29,7 @@ data/
 # Generated demo artifacts (PNGs, CSVs in demos/)
 demos/**/*.png
 demos/**/*.csv
+demos/**/*.html
 
 # Excel files (optional: comment out to track demo Excel outputs)
 *.xlsx
