@@ -381,7 +381,8 @@ def main():
     print("\nStep 3: Render chart (Vega-Lite)...")
     try:
         from chart_customer_matrix_vl import render_customer_matrix_vl
-        render_customer_matrix_vl(cm)
+        use_llm = os.environ.get("USE_LLM_SPEC", "0") == "1"
+        render_customer_matrix_vl(cm, use_llm=use_llm)
     except ImportError:
         print("  [WARNING] chart_customer_matrix_vl not found; falling back to matplotlib")
         render_customer_matrix(cm)
