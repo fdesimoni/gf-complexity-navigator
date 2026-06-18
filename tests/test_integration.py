@@ -18,7 +18,6 @@ import sys
 import shutil
 import tempfile
 
-# Add src to path
 src_path = os.path.join(os.path.dirname(__file__), '..', 'src')
 sys.path.insert(0, src_path)
 
@@ -65,7 +64,6 @@ class TestIntegration:
         """
         Test: Create product input → build bronze → verify gold structure.
         """
-        # Create input Excel with known product data
         product_data = {
             "Sales Order Number": [1, 2, 3],
             "Product Line": ["Line A", "Line B", "Line A"],
@@ -79,8 +77,6 @@ class TestIntegration:
             "Consolidated Gross Profit (CHF)": [200_000.0, 50_000.0, 150_000.0],
         }
         self.create_product_excel(temp_repo, product_data)
-
-        # Verify input exists
         assert (temp_repo / "input" / "Product View.xlsx").exists()
 
     def test_product_aggregation_accuracy(self):
@@ -103,8 +99,6 @@ class TestIntegration:
         }
         assert expected_cols.issubset(p.columns), \
             f"Missing columns in gold product: {expected_cols - set(p.columns)}"
-
-        # Verify no NaN in critical fields
         assert p["Net Sales (CHF)"].notna().all(), "NaN in Net Sales"
         assert p["Consolidated Gross Profit (CHF)"].notna().all(), "NaN in Gross Profit"
 
@@ -117,7 +111,6 @@ class TestIntegration:
         except SystemExit:
             pytest.skip("Gold layer not built; run pipeline first")
 
-        # Verify schema
         expected_cols = {
             "Customer Group",
             "Net Sales CHF",
@@ -126,8 +119,6 @@ class TestIntegration:
         }
         assert expected_cols.issubset(c.columns), \
             f"Missing columns in gold customer: {expected_cols - set(c.columns)}"
-
-        # Verify no NaN
         assert c["Net Sales CHF"].notna().all(), "NaN in Net Sales CHF"
 
     def test_chart_a_output_matches_gold(self):
@@ -142,11 +133,8 @@ class TestIntegration:
         except SystemExit:
             pytest.skip("Gold layer not built; run pipeline first")
 
-        # Run chart_A twice
         result1 = chart_A(p, PLAN_A)
         result2 = chart_A(p, PLAN_A)
-
-        # Results should be identical (deterministic)
         pd.testing.assert_frame_equal(result1, result2)
 
     def test_chart_a_sales_sum(self):
@@ -166,8 +154,6 @@ class TestIntegration:
 
         result = chart_A(p_year, PLAN_A)
         output_total_sales = result["net_sales"].sum()
-
-        # Should match exactly (no rounding allowed on sum)
         assert abs(input_total_sales - output_total_sales) < 1.0, \
             f"Sales sum mismatch: input={input_total_sales}, output={output_total_sales}"
 
@@ -183,8 +169,6 @@ class TestIntegration:
             pytest.skip("Gold layer not built; run pipeline first")
 
         result = chart_A(p, PLAN_A)
-
-        # Most margins should be in [0, 100], but allow high-margin outliers (200%)
         high_margin_count = (result["margin"] > 100).sum()
         assert high_margin_count < len(result) * 0.1, \
             f"Too many margins > 100% ({high_margin_count}/{len(result)})"
@@ -203,8 +187,6 @@ class TestIntegration:
             pytest.skip("Gold layer not built; run pipeline first")
 
         result = chart_C(c, PLAN_C)
-
-        # result is a Series sorted descending; cumsum should be monotonic
         cumsum = result.cumsum()
         is_monotonic = (cumsum.diff().dropna() >= 0).all()
         assert is_monotonic, "Chart C cumsum is not monotonic"

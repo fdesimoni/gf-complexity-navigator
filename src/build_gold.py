@@ -61,8 +61,6 @@ def build_dim_time(customer_silver, product_silver):
     Product view: quarterly grain (year, quarter)
     """
     times = []
-
-    # From customer: year + month
     if "year" in customer_silver.columns and "month" in customer_silver.columns:
         c_times = customer_silver[["year", "month"]].dropna().drop_duplicates()
         for _, row in c_times.iterrows():
@@ -77,13 +75,10 @@ def build_dim_time(customer_silver, product_silver):
                 "quarter": f"{year} Q{(month - 1) // 3 + 1}",
                 "grain": "monthly",
             })
-
-    # From product: year + quarter
     if "quarter" in product_silver.columns:
         p_times = product_silver[["quarter"]].dropna().drop_duplicates()
         for _, row in p_times.iterrows():
             qtr = str(row["quarter"]).strip()
-            # Parse quarter: "2021 Q 1" or "2021-Q1" -> year, quarter num
             parts = qtr.replace("Q", "").replace("-", " ").split()
             if len(parts) >= 2:
                 year = int(parts[0])

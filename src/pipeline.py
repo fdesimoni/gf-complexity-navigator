@@ -63,7 +63,6 @@ def main():
     print("GF BFS - Data Processing Pipeline")
     print("="*70)
 
-    # Check inputs
     missing = check_inputs()
     if missing:
         print("\n[ERROR] Missing input files:")
@@ -71,8 +70,6 @@ def main():
             print(f"  {fpath}")
         print("\nCopy 'Customer View.xlsx' and 'Product View.xlsx' to input/")
         sys.exit(2)
-
-    # Run pipeline stages
     stages = [
         ("build_bronze.py", "BRONZE (Raw → Typed)"),
         ("build_silver.py", "SILVER (Cleaned + Conformed)"),
@@ -82,8 +79,6 @@ def main():
     for i, (script, name) in enumerate(stages, 1):
         if not run_stage(script, name, i):
             sys.exit(1)
-
-    # Success
     print("\n" + "="*70)
     print("SUCCESS: Pipeline complete")
     print("="*70)

@@ -25,7 +25,6 @@ REPO = os.path.dirname(HERE)
 
 
 def check_gold_layer():
-    """Verify gold layer exists."""
     gold_dir = os.path.join(REPO, "data", "gold")
     if not os.path.exists(gold_dir):
         return False
@@ -36,14 +35,10 @@ def main():
     print("\n" + "="*70)
     print("GF BFS - Chart Generation")
     print("="*70)
-
-    # Check gold layer exists
     if not check_gold_layer():
         print("\n[ERROR] Gold layer not found at data/gold/")
         print("Run the data pipeline first: python src/pipeline.py")
         sys.exit(2)
-
-    # Generate spec-driven charts (A, B, C, D, E)
     analysis_script = os.path.join(HERE, "analysis.py")
     print("\nGenerating spec-driven charts...")
     try:
@@ -58,8 +53,6 @@ def main():
     except Exception as e:
         print(f"\n[ERROR] Spec-driven chart generation exception: {e}")
         sys.exit(1)
-
-    # Generate customer matrix chart
     matrix_script = os.path.join(HERE, "chart_customer_matrix.py")
     print("\nGenerating customer matrix chart...")
     try:
@@ -74,8 +67,6 @@ def main():
     except Exception as e:
         print(f"\n[ERROR] Customer matrix chart generation exception: {e}")
         sys.exit(1)
-
-    # Success
     print("\n" + "="*70)
     print("SUCCESS: All charts generated")
     print("="*70)

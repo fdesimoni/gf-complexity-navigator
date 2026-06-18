@@ -17,18 +17,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# Paths anchored to this script
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 GOLD_DIR = os.path.join(REPO, "data", "gold")
 CUST_GOLD = os.path.join(GOLD_DIR, "customer.parquet")
 FACT_DENORM = os.path.join(GOLD_DIR, "fact", "fact_sales_denormalized.parquet")
 OUT_DIR = os.path.join(REPO, "demos", "charts", "chart-customer_matrix")
-
-# Ensure output directory exists
 os.makedirs(OUT_DIR, exist_ok=True)
 
-# Helbling-ish palette
 BLUE = "#1f4e79"
 LBLUE = "#5b9bd5"
 ORANGE = "#ed7d31"
@@ -60,8 +56,6 @@ CUSTOMER_RENAME = {
 
 
 def load_customer():
-    """Load customer data from denormalized fact table or fallback to customer.parquet."""
-    # Try star schema denormalized fact first
     if os.path.exists(FACT_DENORM):
         df = pd.read_parquet(FACT_DENORM)
         # Filter to customer-source facts
@@ -69,7 +63,6 @@ def load_customer():
         if len(df) == 0:
             raise SystemExit(f"[ERROR] denormalized fact table empty or missing _source_view='customer'")
         return df.rename(columns=CUSTOMER_RENAME)
-    # Fallback to legacy customer.parquet
     elif os.path.exists(CUST_GOLD):
         return pd.read_parquet(CUST_GOLD).rename(columns=CUSTOMER_RENAME)
     else:
@@ -80,51 +73,22 @@ def load_customer():
 
 
 def pct_rank(s):
-    """Percentile rank 0-100; NaNs ignored. Deterministic (rank method='average' for ties)."""
     return s.rank(pct=True, method="average") * 100.0
 
 
 def compute_customer_matrix(c):
-    """
-    Compute profitability and complexity scores per Customer Group.
-
-    PROFITABILITY (Y-axis):
-      VALUE = pct_rank(gross_profit) × 0.6 + pct_rank(net_sales) × 0.4
-      profitability_pct = pct_rank(VALUE_raw)  [0-100]
-
-    COMPLEXITY (X-axis):
-      proxy_1 = pct_rank(order_count)           [30% weight]
-      proxy_2 = pct_rank(−avg_order_value)      [30% weight]
-      proxy_3 = pct_rank(neg_line_share)        [20% weight]
-      proxy_4 = pct_rank(regions + sales_units) [20% weight]
-      COMPLEXITY_raw = 0.30×p1 + 0.30×p2 + 0.20×p3 + 0.20×p4
-      complexity_pct = pct_rank(COMPLEXITY_raw)  [0-100]
-
-    Quadrants (defined by 60/40 thresholds):
-      - Top-left:    profitability_pct ≥ 60, complexity_pct < 40
-      - Top-right:   profitability_pct ≥ 60, complexity_pct ≥ 60
-      - Bottom-left: profitability_pct < 40, complexity_pct < 40
-      - Bottom-right: profitability_pct < 40, complexity_pct ≥ 60
-      - Center:      all other (mid-range on at least one axis)
-    """
     c = c.copy()
     c["neg_line"] = (c["Consolidated Gross Profit LC"] < 0).astype(int)
-
-    # Aggregate per Customer Group
     g = c.groupby("Customer Group")
     out = pd.DataFrame({
-        # Profitability drivers
         "net_sales": g["Net Sales LC"].sum(),
         "gross_profit": g["Consolidated Gross Profit LC"].sum(),
-        # Complexity drivers
         "orders": g["Sales Order Number"].nunique(),
         "lines": g.size(),
         "neg_line_share": g["neg_line"].mean(),
         "regions": g["Region"].nunique(),
         "sales_units": g["Sales Unit"].nunique(),
     }).reset_index()
-
-    # Derived metrics
     out["avg_order_value"] = np.where(
         out["orders"] != 0,
         out["net_sales"] / out["orders"],
@@ -136,17 +100,11 @@ def compute_customer_matrix(c):
         0
     )
     out["fragmentation"] = out["regions"] + out["sales_units"]
-
-    # Profitability Score (Y-axis)
-    # VALUE_raw = pct_rank(gross_profit) × 0.6 + pct_rank(net_sales) × 0.4
     out["value_raw"] = (
         pct_rank(out["gross_profit"]) * 0.6
         + pct_rank(out["net_sales"]) * 0.4
     )
     out["profitability_pct"] = pct_rank(out["value_raw"])
-
-    # Complexity Score (X-axis)
-    # Four independent proxies, each percentile-ranked and weighted
     proxy_order_freq = pct_rank(out["orders"])
     proxy_small_order = pct_rank(-out["avg_order_value"])  # negative: small AOV = high complexity
     proxy_margin_leak = pct_rank(out["neg_line_share"])

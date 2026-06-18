@@ -65,7 +65,6 @@ LLM_API_KEY = os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPI
     or "not-used-but-required"
 LLM_MODEL = os.environ.get("ANALYSIS_LLM_MODEL", "claude-sonnet-4-6")
 
-# Helbling-ish palette
 BLUE = "#1f4e79"
 LBLUE = "#5b9bd5"
 ORANGE = "#ed7d31"
@@ -244,8 +243,6 @@ def _llm_messages(prompt, max_tokens=900, timeout=60):
 
 
 def _extract_json(text):
-    """Pull the first {...} JSON object out of an LLM reply (tolerates stray
-    prose or ```json fences)."""
     start = text.find("{")
     end = text.rfind("}")
     if start == -1 or end == -1 or end < start:
@@ -314,16 +311,12 @@ def _merge_plan(default_plan, plan):
 
 
 def _fmt(s, **kw):
-    """Fill {year}/{y0}/{y1} tokens in LLM-provided titles. Tokens the model
-    emitted that we don't supply (e.g. {year} on the year-less ABC chart) are
-    stripped rather than left as literal braces."""
     for key, val in kw.items():
         s = s.replace("{" + key + "}", str(val))
-    # drop any remaining "{token}" the model invented and tidy stray separators
-    s = re.sub(r"\s*\(\{[^}]*\}\)", "", s)   # " ({year})" -> ""
-    s = re.sub(r"\{[^}]*\}", "", s)          # bare "{token}" -> ""
+    s = re.sub(r"\s*\(\{[^}]*\}\)", "", s)
+    s = re.sub(r"\{[^}]*\}", "", s)
     s = re.sub(r"\s{2,}", " ", s).strip()
-    return re.sub(r"[\s,;:–-]+$", "", s)     # drop a separator left dangling by a stripped token
+    return re.sub(r"[\s,;:–-]+$", "", s)
 
 
 # ----------------------------------------------------------------------------
@@ -410,22 +403,20 @@ def chart_A(p, plan):
         heights = g["margin"].values
         ax.set_ylabel("Margin %d [in %%]" % year, color=BLUE)
 
-    widths = g["ns_m"].values.astype(float)            # column width ∝ sales (CHF m)
-    edges = np.concatenate([[0.0], np.cumsum(widths)])  # left edge of each column
-    centers = edges[:-1] + widths / 2.0                 # column centre (for labels/boxes)
-    gap = max(widths.sum() * 0.004, 0.02)               # thin separator between columns
+    widths = g["ns_m"].values.astype(float)
+    edges = np.concatenate([[0.0], np.cumsum(widths)])
+    centers = edges[:-1] + widths / 2.0
+    gap = max(widths.sum() * 0.004, 0.02)
 
     bars = ax.bar(centers, heights, width=np.maximum(widths - gap, 0.0),
                   color=LBLUE, align="center")
 
-    # embedded value boxes inside each column (sales, gross profit), per the spec
     box_styles = {
         "net_sales": (g["ns_m"], "Sales [CHF m]", BLUE),
         "gross_profit": (g["gp_m"], "Gross profit [CHF m]", GREY),
     }
     boxes = [b for b in plan["value_boxes"] if b in box_styles]
     handles = []
-    # only label columns wide enough to hold a box without overlap
     min_w = widths.sum() * 0.020
     for slot, key in enumerate(boxes):
         series, label, color = box_styles[key]
@@ -450,7 +441,6 @@ def chart_A(p, plan):
         ax.text(edges[-1], avg + 1.2, f"Ø margin {avg:.0f}% ({avg_lbl})",
                 ha="right", color=ORANGE, fontsize=8, fontweight="bold")
     ax.set_xlim(0, edges[-1])
-    # x ticks at column centres; suppress labels for columns too narrow to read
     ax.set_xticks(centers)
     ax.set_xticklabels([n if w >= min_w else "" for n, w in zip(g[gfield], widths)],
                        rotation=30, ha="right", fontsize=8.5)
@@ -539,24 +529,13 @@ def chart_B(p, plan):
     else:
         vx = df["margin"].median()
 
-    # Four-quadrant background shading (top band lighter, right band darker —
-    # as in the GF PDF), formed by the 0%-growth line and the vertical ref line.
     xlo, xhi = float(xvals.min()), float(xvals.max())
     xpad = (xhi - xlo) * 0.12 or 1.0
-    # Keep the symmetric CAGR axis as short as possible: hard-cap it at the
-    # configured ±y_clip_pct (default ±20%) so a single far outlier (e.g. a tiny
-    # line at −36% CAGR) can't stretch the axis and leave the plot mostly empty.
-    # Bubbles beyond the cap are clamped to the boundary (see below) so none are
-    # hidden — their true CAGR is shown in the label.
     data_ymax = max(abs(df["cagr"].min()), abs(df["cagr"].max())) * 100
     y_clip = float(plan.get("y_clip_pct", 0) or 0)
     ymax = y_clip if y_clip else (data_ymax * 1.18 or 10)
     df["cagr_plot"] = (df["cagr"] * 100).clip(-ymax * 0.97, ymax * 0.97)
     df["y_clipped"] = (df["cagr"] * 100).abs() > ymax
-
-    # Same treatment for the Δ-margin X axis: hard-cap at the configured ±x_clip_pp
-    # (default ±20 pp) and clamp far outliers (e.g. Silenta at +42 pp) to the edge
-    # so the bulk of the lines aren't squeezed into a narrow central column.
     x_clip = float(plan.get("x_clip_pp", 0) or 0)
     if x_clip:
         xmax = x_clip
@@ -579,10 +558,6 @@ def chart_B(p, plan):
     sizes = (df["sales_m"].clip(lower=0) / df["sales_m"].max() * 1800) + 40
     ax.scatter(df["x_plot"], df["cagr_plot"], s=sizes, c=BLUE, alpha=0.85,
                edgecolors="white", zorder=3)
-    # Label every bubble. Large bubbles get a white label centred inside; small
-    # bubbles can't hold readable text, so their label is offset just outside in
-    # dark ink so no line goes unnamed. A bubble clamped to an axis edge gets its
-    # true (off-axis) value appended so the cap never hides a real number.
     big = df["sales_m"].quantile(0.5)
     for name, r in df.iterrows():
         label = str(name)[:18]
@@ -603,7 +578,6 @@ def chart_B(p, plan):
         ax.axhline(0, color="#9aa7b4", lw=1, zorder=2)
     if plan["vline"] != "none":
         ax.axvline(vx, color="#9aa7b4", lw=1, ls="--", zorder=2)
-
     if xfield == "margin_delta":
         ax.set_xlabel("Δ Margin %d-%d [in pp]" % (y0, y1))
     else:
@@ -680,8 +654,7 @@ def chart_C(c, plan):
     g = c.groupby(gfield)[vfield].sum().sort_values(ascending=False)
     g = g[g > 0]
     if g.empty:
-        print(f"  [skip] chart_C: no customer rows with {vlabel} > 0 "
-              "(Customer View.xlsx is empty?)")
+        print(f"  [skip] chart_C: no customer rows with {vlabel} > 0")
         return None
     total = g.sum()
     cum = g.cumsum() / total * 100
@@ -694,15 +667,7 @@ def chart_C(c, plan):
     n = len(g)
     fig = plt.figure(figsize=(13.33, 7.5))
     ax = fig.add_axes([0.06, 0.12, 0.58, 0.70])
-
-    # Full-height A / B / C bands in three shades of blue (mirrors the GF PDF):
-    # A = darkest, B = mid, C = lightest. Bands span the whole plot height so
-    # the ABC segmentation reads even where the curve hugs the top-left.
-    # Log x-axis: the GF sample is extremely concentrated (A/B are a handful of
-    # customers out of ~1,500), so on a linear axis the A/B bands collapse to
-    # invisible slivers. A log scale spreads the early ranks so the three ABC
-    # bands stay readable while the long C tail stays compact.
-    x0 = 0.7  # left edge just below rank 1 (log scale can't start at 0)
+    x0 = 0.7
     A_BAND, B_BAND, C_BAND = "#2e8be0", "#9cc9ee", "#e3eff8"
     ax.axvspan(x0, a_cut, color=A_BAND, alpha=0.9, lw=0, zorder=0)
     ax.axvspan(a_cut, b_cut, color=B_BAND, alpha=0.9, lw=0, zorder=0)
@@ -724,8 +689,6 @@ def chart_C(c, plan):
     ax.set_xticklabels([str(t) for t in xticks])
     ax.tick_params(axis="x", which="minor", length=0)
     ax.xaxis.set_minor_formatter(plt.NullFormatter())
-
-    # A / B / C labels centred in each band (geometric centre on the log axis).
     def _gmid(lo, hi):
         return float(np.sqrt(max(lo, x0) * hi))
     ax.text(_gmid(x0, a_cut), 30, "A", ha="center", va="center",
@@ -780,13 +743,11 @@ def chart_D(p, plan):
                         values="Net Sales (CHF)", aggfunc="sum", fill_value=0)
 
     # --- segment totals drive column WIDTH (Marimekko) ------------------------
-    seg_tot = piv.sum(axis=0)                       # CHF per segment (column)
+    seg_tot = piv.sum(axis=0)
     if plan.get("sort_segments", True):
         seg_tot = seg_tot.sort_values(ascending=False)
         piv = piv[seg_tot.index]
 
-    # Roll up small segments (sales share < others_max_share of total) into one
-    # "Others" column, mirroring chart_A(). Done on raw CHF so totals reconcile.
     others_share = float(plan.get("others_max_share", 0.0) or 0.0)
     total_all = float(seg_tot.sum())
     if others_share > 0 and total_all > 0:
@@ -798,26 +759,20 @@ def chart_D(p, plan):
             piv["Others"] = others
             seg_tot = piv.sum(axis=0)
 
-    share = piv / piv.sum(axis=0) * 100             # within-segment % (column height)
-    seg_tot_m = seg_tot / 1e6                        # CHF m for labels
+    share = piv / piv.sum(axis=0) * 100
+    seg_tot_m = seg_tot / 1e6
     cats = share.index.tolist()
     segs = share.columns.tolist()
     colors = plt.cm.tab20(np.linspace(0, 1, len(cats)))
 
     fig = plt.figure(figsize=(13.33, 7.5))
-    # Taller bottom margin to host the staggered (multi-tier) x-axis labels.
     ax = fig.add_axes([0.08, 0.24, 0.55, 0.60])
-
-    # --- Mekko (Marimekko) geometry -------------------------------------------
-    # Column HEIGHT = within-segment product-line share (sums to 100%); column
-    # WIDTH ∝ segment Net Sales; columns drawn edge-to-edge so total width = total
-    # sales. Same pattern as chart_A(). See spec.md FR-003..FR-005.
     widths = seg_tot_m.values.astype(float)
-    edges = np.concatenate([[0.0], np.cumsum(widths)])   # left edge of each column
-    centers = edges[:-1] + widths / 2.0                  # column centre (ticks/labels)
-    gap = max(widths.sum() * 0.004, 0.02)                # thin separator
+    edges = np.concatenate([[0.0], np.cumsum(widths)])
+    centers = edges[:-1] + widths / 2.0
+    gap = max(widths.sum() * 0.004, 0.02)
     bar_w = np.maximum(widths - gap, 0.0)
-    min_w = widths.sum() * 0.020                         # columns too narrow to label
+    min_w = widths.sum() * 0.020
 
     bottom = np.zeros(len(segs))
     for ci, cat in enumerate(cats):
@@ -831,16 +786,10 @@ def chart_D(p, plan):
         bottom += vals
 
     ax.set_xlim(0, edges[-1])
-    # Staggered x-axis labels: every column is labelled (even narrow ones), but
-    # consecutive labels alternate across stacked tiers below the axis so adjacent
-    # narrow columns never overlap. A thin leader connects each column centre to
-    # its label. Mirrors the GF PDF example. See spec.md FR-006.
     ax.set_xticks(centers)
-    ax.set_xticklabels([])                 # suppress default (overlapping) tick text
+    ax.set_xticklabels([])
     ax.tick_params(axis="x", length=0)
-    tiers = [-0.06, -0.115, -0.17, -0.225]   # axes-fraction y per tier (below the axis)
-    # Use as many tiers as needed: 2 when every column is wide, up to 4 for a
-    # long tail of narrow columns (keeps every group rather than rolling up).
+    tiers = [-0.06, -0.115, -0.17, -0.225]
     n_tiers = 2 if (widths >= min_w).all() else len(tiers)
     for i, (xi, s, t) in enumerate(zip(centers, segs, seg_tot_m.values)):
         y = tiers[i % n_tiers]
@@ -855,7 +804,6 @@ def chart_D(p, plan):
     ax.set_ylabel("Product sales (in %% of buying-group sales %d)" % year)
     ax.set_ylim(0, 100)
     ax.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), fontsize=7.5, frameon=False)
-
     _slide(fig, _fmt(plan["title"], year=year),
            _fmt(plan["subtitle"], seg=seg, year=year))
     biggest, smallest = seg_tot_m.index[0], seg_tot_m.index[-1]
@@ -953,8 +901,8 @@ def chart_E(c, plan):
     rank = g["rank"].values
 
     fig = plt.figure(figsize=(13.33, 7.5))
-    ax = fig.add_axes([0.07, 0.12, 0.57, 0.70])          # left axis: profit (money)
-    axm = ax.twinx()                                     # right axis: margin (%)
+    ax = fig.add_axes([0.07, 0.12, 0.57, 0.70])
+    axm = ax.twinx()
 
     # Left: consolidated profit as a descending filled area (in {cur} '000s).
     profit_k = g["profit"].values / 1e3
@@ -976,15 +924,10 @@ def chart_E(c, plan):
     axm.set_ylabel("Consolidated Margin [%]", color=BLUE)
     axm.set_ylim(0, 100)
     axm.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v:.0f}%"))
-
-    # Low-margin highlight box: customers whose margin sits BELOW the cut-off.
-    # Drawn on the margin (right) axis so the band height = 0..cutoff.
     axm.axhspan(0, cutoff, xmin=0, xmax=1, facecolor="none", edgecolor=RED,
                 lw=1.6, zorder=4)
     axm.text(n * 0.995, cutoff + 1.5, f"margin < {cutoff:.0f}%", ha="right",
              va="bottom", color=RED, fontsize=7.5, fontweight="bold", zorder=5)
-
-    # Legend naming both series (proxy markers, not the real axes objects).
     handles = [
         plt.Line2D([0], [0], marker="s", color="none", markerfacecolor="#222222",
                    markersize=9, label="Consolidated Profit"),
@@ -1019,13 +962,6 @@ def chart_E(c, plan):
 
 
 def store_chart(name, data, png_filename):
-    """Store one chart's data + image in its own ./<OUT>/chart-<name>/ folder,
-    so each chart can be fine-tuned independently.
-
-    Writes:  data.csv  (the exact numbers behind the chart, fine-tune here)
-             data.xlsx (same, Excel)
-    and moves the already-saved PNG into the folder.
-    """
     folder = os.path.join(OUT, f"chart-{name}")
     os.makedirs(folder, exist_ok=True)
     df = data.reset_index() if data.index.name or isinstance(data.index, pd.MultiIndex) \
@@ -1040,21 +976,18 @@ def store_chart(name, data, png_filename):
     return folder
 
 
-def _spec(name):
-    return os.path.join(OUT, f"chart-{name}", "spec.md")
-
-
 def main():
     os.makedirs(OUT, exist_ok=True)
     p = load_product()
     c = load_customer()
 
     print("Resolving render plans from each chart's spec.md ...")
-    plan_a = plan_chart_from_spec(_spec("product_group_sales_margin"), PLAN_A)
-    plan_b = plan_chart_from_spec(_spec("product_cagr_margin"), PLAN_B)
-    plan_c = plan_chart_from_spec(_spec("customer_abc"), PLAN_C)
-    plan_d = plan_chart_from_spec(_spec("product_split_segment"), PLAN_D)
-    plan_e = plan_chart_from_spec(_spec("customer_profit_and_margin"), PLAN_E)
+    spec_fn = lambda name: os.path.join(OUT, f"chart-{name}", "spec.md")
+    plan_a = plan_chart_from_spec(spec_fn("product_group_sales_margin"), PLAN_A)
+    plan_b = plan_chart_from_spec(spec_fn("product_cagr_margin"), PLAN_B)
+    plan_c = plan_chart_from_spec(spec_fn("customer_abc"), PLAN_C)
+    plan_d = plan_chart_from_spec(spec_fn("product_split_segment"), PLAN_D)
+    plan_e = plan_chart_from_spec(spec_fn("customer_profit_and_margin"), PLAN_E)
 
     print("A) product-group sales & margin ...")
     A = chart_A(p, plan_a)
@@ -1084,10 +1017,6 @@ def main():
         store_chart("customer_profit_and_margin", E_renamed, "E_customer_profit_and_margin.png")
 
     print("\nDone. Each chart now lives in ./%s/chart-<name>/" % OUT)
-    for d in sorted(os.listdir(OUT)):
-        full = os.path.join(OUT, d)
-        if os.path.isdir(full):
-            print("  -", d, "->", sorted(os.listdir(full)))
 
 
 if __name__ == "__main__":

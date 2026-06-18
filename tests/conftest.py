@@ -30,19 +30,13 @@ def product_fixture_multiear():
         ),
         "Year": [2021, 2022, 2023, 2024, 2025] * 3,
         "Net Sales (CHF)": [
-            # Line A: steady growth
             1_000_000, 1_100_000, 1_150_000, 1_200_000, 1_500_000,
-            # Line B: decline
             2_000_000, 1_900_000, 1_800_000, 1_600_000, 1_500_000,
-            # Line C: volatile
             500_000, 600_000, 500_000, 700_000, 900_000,
         ],
         "Consolidated Gross Profit (CHF)": [
-            # Line A: improving margins
             200_000, 220_000, 230_000, 240_000, 300_000,
-            # Line B: declining margins
             300_000, 285_000, 270_000, 240_000, 225_000,
-            # Line C: volatile
             75_000, 90_000, 75_000, 105_000, 180_000,
         ],
     })
@@ -73,11 +67,8 @@ def customer_fixture_abc():
             "C1", "C2", "C3", "C4", "C5",  # Long tail (C customers)
         ],
         "Consolidated Gross Profit CHF": [
-            # A tier: 300k each
             300_000, 300_000, 300_000,
-            # B tier: 100k each
             100_000, 100_000,
-            # C tier: 10-50k each
             50_000, 40_000, 30_000, 20_000, 10_000,
         ],
     })

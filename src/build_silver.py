@@ -46,24 +46,18 @@ def silver_customer(b, dq):
     n0 = len(b)
     b = _trim_strings(b.copy())
 
-    # Load customer dimension table (fuzzy-consolidated names + customer_id)
     if not os.path.exists(CUSTOMER_DIM_FILE):
         print(f"  [ERROR] missing customer dimension: {CUSTOMER_DIM_FILE}")
         print(f"          Run build_customer_dimension.py first")
         raise SystemExit(1)
 
     dim = pd.read_csv(CUSTOMER_DIM_FILE)
-
-    # Map original customer_number to (customer_id, consolidated customer_name)
-    # Create lookup: customer_number -> {customer_id, customer_name}
     cust_lookup = {}
     for _, row in dim.iterrows():
         cust_lookup[str(row['sales_location_id'])] = {
             'customer_id': row['customer_id'],
             'customer_name': row['customer_name'],
         }
-
-    # Apply customer dimension mapping
     b['customer_number'] = b['customer_number'].astype(str)
     mapped = b['customer_number'].map(lambda x: cust_lookup.get(x, {}).get('customer_id'))
     not_found = mapped.isna().sum()
@@ -72,23 +66,17 @@ def silver_customer(b, dq):
 
     b['customer_id'] = mapped
     b['customer_name'] = b['customer_number'].map(lambda x: cust_lookup.get(x, {}).get('customer_name'))
-
-    # Drop rows where mapping failed
     b = b.dropna(subset=['customer_id', 'customer_name'])
 
     _log(dq, t, "customer_dimension_mapped", len(b),
          f"consolidated to {b['customer_id'].nunique()} unique customers", "customer_dim_map")
-
-    # exact-duplicate rows -> dropped
     b = b.drop_duplicates()
     _log(dq, t, "exact_duplicate_rows_dropped", len(b) - n0, "", "drop_exact_dupes")
 
     ns = b["net_sales_lc"]
     gp = b["consolidated_gross_profit_lc"]
-
-    # suspect rows KEPT + FLAGGED
     b["is_negative_gp"] = (gp < 0)
-    b["is_zero_sales"] = (ns <= 0)               # customer: returns/credits/rebates
+    b["is_zero_sales"] = (ns <= 0)
     b["is_cost_without_sales"] = (ns == 0) & (gp != 0)
     b["is_missing_currency"] = b["local_currency"].isna()
     b["is_missing_buying_group"] = b["buying_group_l6"].isna()

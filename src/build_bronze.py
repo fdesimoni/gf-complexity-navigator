@@ -24,12 +24,6 @@ BRONZE_DIR = os.path.join(REPO, "data", "bronze")
 CUST_FILE = os.path.join(INPUT_DIR, "Customer View.xlsx")
 PROD_FILE = os.path.join(INPUT_DIR, "Product View.xlsx")
 
-# ----------------------------------------------------------------------------
-# Raw -> bronze column maps. Keys are the raw Excel headers (after strip());
-# values are the snake_case bronze names. Any raw column NOT in the map is
-# still carried through with an auto-snake_cased name, but a warning is printed
-# so a schema change (renamed/added column) is loud, not silent.
-# ----------------------------------------------------------------------------
 CUSTOMER_MAP = {
     "Year": "year",
     "Month": "month",
@@ -76,7 +70,6 @@ PRODUCT_MAP = {
     "Rep. Product Line": "rep_product_line",
 }
 
-# Bronze columns to force numeric (everything else stays string/datetime as read).
 CUSTOMER_NUMERIC = [
     "net_ordered_amount_lc", "ns_ordered_amount_lc", "net_sales_lc",
     "consolidated_gross_profit_lc", "consolidated_gross_profit_lc_incl_freight",
