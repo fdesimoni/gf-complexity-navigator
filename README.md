@@ -38,21 +38,13 @@ Copy GF source files to `input/` and `.env.example` to `.env`.
 ## Quickstart
 
 ```powershell
-python src/build_bronze.py
-python src/build_silver.py
-python src/build_gold.py
 python src/pipeline.py
-python src/analysis.py
+python src/charts.py
 ```
 
 ## Pipeline
 
 | Script | Purpose |
 |--------|---------|
-| `build_bronze.py` | Load & type-coerce Excel data |
-| `build_silver.py` | Clean & deduplicate |
-| `build_gold.py` | Enrich for analysis |
-| `pipeline.py` | Complexity vs. value analysis, clusters, fact sheets |
+| `pipeline.py` | Run the data processing pipeline |
 | `analysis.py` | Generate Helbling-style charts |
-| `build_audit.py` | Audit trail |
-
