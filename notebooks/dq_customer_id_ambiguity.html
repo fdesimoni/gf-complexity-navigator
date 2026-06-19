@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+        vega-chart.vega-embed {
+          width: 100%;
+          display: flex;
+        }
+        vega-chart.vega-embed details,
+        vega-chart.vega-embed details summary {
+          position: relative;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Chart</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+            
+  </head>
+  <body>
+    <div id="vega-chart"></div>
+    <script type="text/javascript">
+
+{
+    const spec = {"$schema":"https://vega.github.io/schema/vega-lite/v5.json","title":"Master Data Ambiguity: Customer Identifier Cardinality","width":500,"height":300,"data":{"values":[{"identifier":"Distinct Names","count":2638,"type":"Name"},{"identifier":"Distinct Groups","count":2366,"type":"Group"},{"identifier":"Distinct Numbers","count":3185,"type":"Number"}]},"mark":"bar","encoding":{"x":{"field":"identifier","type":"nominal","title":"Identifier"},"y":{"field":"count","type":"quantitative","title":"Distinct Count"},"color":{"value":"#1f4e79"},"tooltip":[{"field":"identifier","type":"nominal","title":"Field"},{"field":"count","type":"quantitative","title":"Distinct Values"}]}};
+    const opts = {"renderer":"svg"}
+    vegaEmbed('#vega-chart', spec, opts).catch(console.error);
+}
+
+    </script>
+  </body>
+</html>
+        

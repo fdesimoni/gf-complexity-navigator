@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+        vega-chart.vega-embed {
+          width: 100%;
+          display: flex;
+        }
+        vega-chart.vega-embed details,
+        vega-chart.vega-embed details summary {
+          position: relative;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Chart</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+            
+  </head>
+  <body>
+    <div id="vega-chart"></div>
+    <script type="text/javascript">
+
+{
+    const spec = {"$schema":"https://vega.github.io/schema/vega-lite/v5.json","title":"Anomalous Booking Pattern: Cost Without Sales","width":500,"height":300,"data":{"values":[{"table":"Customer","status":"Normal","count":111980},{"table":"Customer","status":"Cost-Without-Sales","count":3844},{"table":"Product","status":"Normal","count":36241},{"table":"Product","status":"Cost-Without-Sales","count":692}]},"mark":"bar","encoding":{"x":{"field":"table","type":"nominal","title":"Data Table"},"y":{"field":"count","type":"quantitative","title":"Row Count"},"color":{"field":"status","type":"nominal","scale":{"domain":["Normal","Cost-Without-Sales"],"range":["#2e7d32","#ed7d31"]}}}};
+    const opts = {"renderer":"svg"}
+    vegaEmbed('#vega-chart', spec, opts).catch(console.error);
+}
+
+    </script>
+  </body>
+</html>
+        

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+        vega-chart.vega-embed {
+          width: 100%;
+          display: flex;
+        }
+        vega-chart.vega-embed details,
+        vega-chart.vega-embed details summary {
+          position: relative;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Chart</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+            
+  </head>
+  <body>
+    <div id="vega-chart"></div>
+    <script type="text/javascript">
+
+{
+    const spec = {"$schema":"https://vega.github.io/schema/vega-lite/v5.json","title":"Combined Impact: % of Data Rows with DQ Issues","width":500,"height":300,"data":{"values":[{"table":"Customer","status":"Clean","count":84747},{"table":"Customer","status":"Has Issues","count":31077},{"table":"Product","status":"Clean","count":28214},{"table":"Product","status":"Has Issues","count":8719}]},"mark":"bar","encoding":{"x":{"field":"table","type":"nominal","title":"Data Table"},"y":{"field":"count","type":"quantitative","title":"Row Count"},"color":{"field":"status","type":"nominal","scale":{"domain":["Clean","Has Issues"],"range":["#2e7d32","#c0392b"]}},"tooltip":[{"field":"table","type":"nominal","title":"Table"},{"field":"status","type":"nominal","title":"Status"},{"field":"count","type":"quantitative","title":"Count"}]}};
+    const opts = {"renderer":"svg"}
+    vegaEmbed('#vega-chart', spec, opts).catch(console.error);
+}
+
+    </script>
+  </body>
+</html>
+        

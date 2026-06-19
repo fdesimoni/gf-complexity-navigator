@@ -1,0 +1,10 @@
+Issue,Data Table,Rows Affected,Percent Affected,Severity,Category
+is_negative_gp,Customer,14259,12.3%,High,Faulty Data
+is_zero_sales,Customer,26629,23.0%,High,Faulty Data
+is_cost_without_sales,Customer,3844,3.3%,Low,Other
+is_missing_currency,Customer,12,0.0%,Low,Missing Data
+is_negative_gp,Product,3235,8.8%,Medium,Faulty Data
+is_zero_sales,Product,2977,8.1%,Medium,Faulty Data
+is_cost_without_sales,Product,692,1.9%,Low,Other
+is_missing_gp,Product,3889,10.5%,High,Missing Data
+is_missing_buying_group,Product,2009,5.4%,Medium,Missing Data

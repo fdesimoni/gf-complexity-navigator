@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+        vega-chart.vega-embed {
+          width: 100%;
+          display: flex;
+        }
+        vega-chart.vega-embed details,
+        vega-chart.vega-embed details summary {
+          position: relative;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Chart</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+            
+  </head>
+  <body>
+    <div id="vega-chart"></div>
+    <script type="text/javascript">
+
+{
+    const spec = {"$schema":"https://vega.github.io/schema/vega-lite/v5.json","title":"Zero/Negative Sales by Region (Returns, Credits, Rebates)","width":600,"height":300,"data":{"values":[{"region":"DACH","zero_sales_count":25380,"total":106716,"zero_sales_pct":23.782750477903967},{"region":"NorthWest Europe","zero_sales_count":1249,"total":9108,"zero_sales_pct":13.713219148001755}]},"mark":"bar","encoding":{"x":{"field":"region","type":"nominal","title":"Region","sort":"-y"},"y":{"field":"zero_sales_count","type":"quantitative","title":"Row Count (Returns/Credits)"},"color":{"value":"#ed7d31"},"tooltip":[{"field":"region","type":"nominal","title":"Region"},{"field":"zero_sales_count","type":"quantitative","title":"Count"},{"field":"zero_sales_pct","type":"quantitative","title":"% of Region","format":".1f"}]}};
+    const opts = {"renderer":"svg"}
+    vegaEmbed('#vega-chart', spec, opts).catch(console.error);
+}
+
+    </script>
+  </body>
+</html>
+        
