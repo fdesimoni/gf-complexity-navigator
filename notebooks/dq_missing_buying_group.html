@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+        vega-chart.vega-embed {
+          width: 100%;
+          display: flex;
+        }
+        vega-chart.vega-embed details,
+        vega-chart.vega-embed details summary {
+          position: relative;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Chart</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+            
+  </head>
+  <body>
+    <div id="vega-chart"></div>
+    <script type="text/javascript">
+
+{
+    const spec = {"$schema":"https://vega.github.io/schema/vega-lite/v5.json","title":"Product Rows: Buying Group L6 Coverage","width":400,"height":300,"data":{"values":[{"category":"Has Buying Group","count":34924},{"category":"Missing Buying Group","count":2009}]},"mark":{"type":"arc","innerRadius":50},"encoding":{"theta":{"field":"count","type":"quantitative"},"color":{"field":"category","type":"nominal","scale":{"domain":["Has Buying Group","Missing Buying Group"],"range":["#2e7d32","#c0392b"]}},"tooltip":[{"field":"category","type":"nominal","title":"Status"},{"field":"count","type":"quantitative","title":"Row Count"}]}};
+    const opts = {"renderer":"svg"}
+    vegaEmbed('#vega-chart', spec, opts).catch(console.error);
+}
+
+    </script>
+  </body>
+</html>
+        

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+        vega-chart.vega-embed {
+          width: 100%;
+          display: flex;
+        }
+        vega-chart.vega-embed details,
+        vega-chart.vega-embed details summary {
+          position: relative;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Chart</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+            
+  </head>
+  <body>
+    <div id="vega-chart"></div>
+    <script type="text/javascript">
+
+{
+    const spec = {"$schema":"https://vega.github.io/schema/vega-lite/v5.json","title":"Gross Profit Completeness by Business Unit","width":500,"height":300,"data":{"values":[{"business_unit":"Europe","status":"Has GP","count":33044},{"business_unit":"Europe","status":"Missing GP","count":3889}]},"mark":"bar","encoding":{"x":{"field":"business_unit","type":"nominal","title":"Business Unit"},"y":{"field":"count","type":"quantitative","title":"Row Count"},"color":{"field":"status","type":"nominal","scale":{"domain":["Has GP","Missing GP"],"range":["#2e7d32","#c0392b"]}}}};
+    const opts = {"renderer":"svg"}
+    vegaEmbed('#vega-chart', spec, opts).catch(console.error);
+}
+
+    </script>
+  </body>
+</html>
+        

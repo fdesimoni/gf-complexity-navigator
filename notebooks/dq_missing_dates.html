@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+        vega-chart.vega-embed {
+          width: 100%;
+          display: flex;
+        }
+        vega-chart.vega-embed details,
+        vega-chart.vega-embed details summary {
+          position: relative;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Chart</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+            
+  </head>
+  <body>
+    <div id="vega-chart"></div>
+    <script type="text/javascript">
+
+{
+    const spec = {"$schema":"https://vega.github.io/schema/vega-lite/v5.json","title":"Booked Date Completeness by Year (Customer Data)","width":600,"height":300,"data":{"values":[{"year":"2025","status":"Has Booked Date","count":69183},{"year":"2025","status":"Missing Booked Date","count":18887},{"year":"2026","status":"Has Booked Date","count":23389},{"year":"2026","status":"Missing Booked Date","count":4365}]},"mark":"bar","encoding":{"x":{"field":"year","type":"ordinal","title":"Year"},"y":{"field":"count","type":"quantitative","title":"Row Count"},"color":{"field":"status","type":"nominal","scale":{"domain":["Has Booked Date","Missing Booked Date"],"range":["#2e7d32","#c0392b"]}}}};
+    const opts = {"renderer":"svg"}
+    vegaEmbed('#vega-chart', spec, opts).catch(console.error);
+}
+
+    </script>
+  </body>
+</html>
+        
